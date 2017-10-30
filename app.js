@@ -1,8 +1,12 @@
-/* NOTES: 
-> 'submit' in the form handler means it will run when the submit button is clicked, or the enter/return button is pressed.
-> DOMContentLoaded loads all the HTML before running the JS file. It means the JS src tag can be anywhere in the HTML file (e.g. in the head), but it's best to always put it at the end of <body>'*/
+/* 
+> 'submit' in the form handler means it will run when the submit button is clicked, or the 
+enter/return button is pressed.
+> DOMContentLoaded loads all the HTML before running the JS file. It means the JS src tag can 
+be anywhere in the HTML file (e.g. in the head), but it's best to always put it at the end of 
+<body>'*/
 
 document.addEventListener('DOMContentLoaded', () => {
+  
   const form = document.getElementById('registrar');
   const input = form.querySelector('input');
   
@@ -13,6 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterLable = document.createElement('label');
   const filterCheckBox = document.createElement('input');
   
+  let emptySubmits = 0;
+  let duplicateSubmits = 0;
+  let invitees = [];
+  
   filterLable.textContent = "Hide those who haven't responded";
   filterCheckBox.type = 'checkbox';
   div.appendChild(filterLable);
@@ -21,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Hide/show those who haven't responded
   filterCheckBox.addEventListener('change', (e) => {
-    // debugger;
+    
     const isChecked = e.target.checked; // if checkbox checked the value will be true and vica versa
     const lis = ul.children;
   
@@ -37,44 +45,97 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // create li function
   function createLi(text) {
-      // create li, and span and add input text 
+    
+      function createElement(elementName, property, value) {
+          const element = document.createElement(elementName);
+          element[property] = value;
+          return element;
+      };
+      function appendToLi(elementName, property, value) {
+          const element = createElement(elementName, property, value);
+          li.appendChild(element);
+          return element;
+      };
       const li = document.createElement('li');
-      const span = document.createElement('span');
-      span.textContent = text;
-      li.appendChild(span);
-      
-      // create and append label
-      const label = document.createElement('label');
-      label.textContent = 'Confirmed';
-      li.appendChild(label);
-      
-      // create and append checkbox
-      const checkBox = document.createElement('input');
-      checkBox.type = 'checkbox';
-      label.appendChild(checkBox);
-      
-      // create and append edit button
-      const editButton = document.createElement('button');
-      editButton.textContent = 'edit';
-      li.appendChild(editButton);
-      
-      // create and append remove button
-      const removeButton = document.createElement('button');
-      removeButton.textContent = 'remove';
-      li.appendChild(removeButton);
-      
+      appendToLi('span', 'textContent', text);
+      appendToLi('label', 'textContent', 'Confirmed')
+        .appendChild(createElement('input', 'type', 'checkbox'));
+      appendToLi('button', 'textContent', 'edit');
+      appendToLi('button', 'textContent', 'remove');
       return li;
   };
   
-  // Form handler (add name to page)
+  // Form handler (add invitee [name, checkbox, buttons] to page)
   form.addEventListener('submit', (e) => {
+    
       e.preventDefault(); // prevents page trying to submit to server (default behaviour)
-      const text = input.value;
-      input.value = ''; // clear input box
-      const li = createLi(text);
-      ul.appendChild(li);
+      
+      const name = input.value.toLowerCase();
+      const header = document.querySelector('header');
+      
+      const errorMessageActions = {
+          noNameMessage: () => {
+            const errorMessage = document.createElement('p');
+            errorMessage.textContent = "Please submit a name."
+            header.appendChild(errorMessage);
+          },
+          sameNameMessage: () => {
+            const errorMessage = document.createElement('p');
+            errorMessage.textContent = "Cannot enter same name twice."
+            header.appendChild(errorMessage);
+          },
+          removeErrorMessage: () => {
+            const message = header.lastElementChild;
+            header.removeChild(message);
+          }
+      };
+      debugger;
+      // if existing empty submit error message, remove it
+      if (emptySubmits > 0) {
+            errorMessageActions.removeErrorMessage();
+            emptySubmits = 0;
+      }
+      // else if existing duplicate name error message, remove it
+      else if (duplicateSubmits > 0) {
+            errorMessageActions.removeErrorMessage();
+            duplicateSubmits = 0;
+      }
+          
+      // if empty string submitted, throw error message   
+      if (input.value === '') { 
+          errorMessageActions.noNameMessage(); 
+          emptySubmits++;
+      }
+      // else if name submitted 
+      else {
+        // if a name has already been submitted
+        if (invitees.length > 0) { 
+          // check if name is duplicate and, if so, increment counter
+          for (let i = 0; i < invitees.length; i++) {
+            if (name === invitees[i]) {
+              duplicateSubmits++;
+            }
+          }
+          // if duplicate name, throw error message
+          if (duplicateSubmits > 0) {
+            errorMessageActions.sameNameMessage(); 
+          }
+          // else, create invitee
+          else {
+            input.value = '';
+            const li = createLi(name);
+            ul.appendChild(li);
+            invitees.push(name);
+          } 
+      } else { // else if name submitted but no name already submitted
+          // create invitee
+          input.value = '';
+          const li = createLi(name);
+          ul.appendChild(li);
+          invitees.push(name); 
+        }
+      }
   });
   
   // 'Confirmed' checkbox handler
@@ -90,37 +151,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // remove-edit-save buttons handler
+  // buttons & input field handler
   ul.addEventListener('click', (e) => {
     
     if (e.target.tagName === 'BUTTON') {
+      
       const button = e.target;
       const li = button.parentNode;
       const ul = li.parentNode;
+      const action = button.textContent;
       
-      if (button.textContent === 'remove') {
-        ul.removeChild(li);
-      } 
-      else if (button.textContent === 'edit') {
-        const span = li.firstElementChild;
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = span.textContent;
-        li.insertBefore(input, span);
-        li.removeChild(span);
-        button.textContent = 'save';
-      } 
-      else if (button.textContent === 'save') {
-        const input = li.firstElementChild;
-        const span = document.createElement('span');
-        span.textContent = input.value;
-        li.insertBefore(span, input);
-        li.removeChild(input);
-        button.textContent = 'edit';
-      }
+      const nameActions = {
+        remove: () => {
+          ul.removeChild(li);
+        },
+        edit: () => {
+          const span = li.firstElementChild;
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = span.textContent;
+          li.insertBefore(input, span);
+          li.removeChild(span);
+          button.textContent = 'save';
+        },
+        save: () => {
+          const input = li.firstElementChild;
+          const span = document.createElement('span');
+          span.textContent = input.value;
+          li.insertBefore(span, input);
+          li.removeChild(input);
+          button.textContent = 'edit';
+        }
+      };
+      // The string in the action variable is used to 
+      // directly access the function in nameActions.
+      nameActions[action](); 
     }
   });
 });
+
+
 
 
 
