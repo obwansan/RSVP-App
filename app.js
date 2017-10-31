@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       const li = document.createElement('li');
       appendToLi('span', 'textContent', text);
-      appendToLi('label', 'textContent', 'Confirmed')
+      appendToLi('label', 'textContent', 'Confirm')
         .appendChild(createElement('input', 'type', 'checkbox'));
       appendToLi('button', 'textContent', 'edit');
       appendToLi('button', 'textContent', 'remove');
@@ -89,8 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const message = header.lastElementChild;
             header.removeChild(message);
           }
-      };
-      debugger;
+      };    
       // if existing empty submit error message, remove it
       if (emptySubmits > 0) {
             errorMessageActions.removeErrorMessage();
@@ -142,16 +141,20 @@ document.addEventListener('DOMContentLoaded', () => {
   ul.addEventListener('change', (e) => {
     const checkbox = e.target;
     const checked = checkbox.checked;
+    const label = checkbox.parentNode;
     const listItem = checkbox.parentNode.parentNode;
     
     if (checked) {
       listItem.className = 'responded';
+      label.childNodes[0].nodeValue = 'Confirmed';
     } else {
       listItem.className = '';
+      label.childNodes[0].nodeValue = 'Confirm';
     }
   });
-  
-  // buttons & input field handler
+  /* childNodes[0] is the first text node of label element. Best way to access a text node. The textContent and innerHTML properties remove any child nodes (in this case, the checkbox!)*/
+    
+  // Buttons & input field handler
   ul.addEventListener('click', (e) => {
     
     if (e.target.tagName === 'BUTTON') {
