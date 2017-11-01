@@ -127,6 +127,16 @@ div > input:last-child {
 div > label {
   color: #767676;
 }
+textarea {
+    width: 150px;
+    height: 75px;
+    resize: none;
+    display: block;
+    margin: 20px 0;
+}
+.error-message {
+    color: red;
+}
 
 /* responded */
 .responded {
@@ -137,6 +147,7 @@ div > label {
   transition: 0.4s;
   color: rgba(88, 183, 205, 1);
 }
+
 
 /* ================================= 
   Media Queries

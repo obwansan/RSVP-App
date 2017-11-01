@@ -1,8 +1,3 @@
-3. Text area
-
-Add text area to each li for notes (e.g. time they'll arrive, what they’re bringing etc)
-
-
 4. Change the Confirmed checkbox to a list (select element) and include:
 	- To confirm
 	- Confirmed
@@ -59,7 +54,9 @@ NOTES:
   SOLUTION: "If you want to return the text of an element, remember that text is always inside a Text node, and you will have to return the Text node's node value (element.childNodes[0].nodeValue)."
 
 
+3. Text area
 
+Add text area to each li for notes (e.g. time they'll arrive, what they’re bringing etc).
 
 
 

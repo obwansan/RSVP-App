@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let emptySubmits = 0;
   let duplicateSubmits = 0;
   let invitees = [];
+  let name = '';
   
   filterLable.textContent = "Hide those who haven't responded";
   filterCheckBox.type = 'checkbox';
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .appendChild(createElement('input', 'type', 'checkbox'));
       appendToLi('button', 'textContent', 'edit');
       appendToLi('button', 'textContent', 'remove');
+      appendToLi('textarea', 'textContent', 'Enter notes here...');
       return li;
   };
   
@@ -71,18 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
       e.preventDefault(); // prevents page trying to submit to server (default behaviour)
       
-      const name = input.value.toLowerCase();
+      name = input.value.toLowerCase();
       const header = document.querySelector('header');
       
       const errorMessageActions = {
-          noNameMessage: () => {
+          
+          printErrorMessage: (message) => {
             const errorMessage = document.createElement('p');
-            errorMessage.textContent = "Please submit a name."
-            header.appendChild(errorMessage);
-          },
-          sameNameMessage: () => {
-            const errorMessage = document.createElement('p');
-            errorMessage.textContent = "Cannot enter same name twice."
+            errorMessage.textContent = message;
+            errorMessage.className = "error-message";
             header.appendChild(errorMessage);
           },
           removeErrorMessage: () => {
@@ -103,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
           
       // if empty string submitted, throw error message   
       if (input.value === '') { 
-          errorMessageActions.noNameMessage(); 
+          errorMessageActions.printErrorMessage("Please submit a name"); 
           emptySubmits++;
       }
       // else if name submitted 
@@ -118,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           // if duplicate name, throw error message
           if (duplicateSubmits > 0) {
-            errorMessageActions.sameNameMessage(); 
+            errorMessageActions.printErrorMessage("Cannot submit duplicate name"); 
           }
           // else, create invitee
           else {
@@ -163,10 +162,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const li = button.parentNode;
       const ul = li.parentNode;
       const action = button.textContent;
+        
+      function deleteNameInArray(name) {
+          for (let i = 0; i < invitees.length; i++) {
+            if (name === invitees[i]) {
+              invitees.splice(i, 1);
+            }
+          }
+      };
       
       const nameActions = {
         remove: () => {
           ul.removeChild(li);
+          deleteNameInArray(li.firstElementChild.textContent);
         },
         edit: () => {
           const span = li.firstElementChild;
@@ -174,7 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
           input.type = 'text';
           input.value = span.textContent;
           li.insertBefore(input, span);
-          li.removeChild(span);
+          li.removeChild(span);;
+          deleteNameInArray(span.textContent);
           button.textContent = 'save';
         },
         save: () => {
